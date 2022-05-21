@@ -6,7 +6,7 @@ import usuarioRoutes from './routes/usuarioRoutes.js';
 
 const servidor  = express();
 
-servidor.use(express.json());
+servidor.use(express.json()); //* Este es el sustituto de body-parser, que está deprecated
 
 dotenv.config();
 

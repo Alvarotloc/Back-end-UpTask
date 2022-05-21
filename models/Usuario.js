@@ -26,17 +26,21 @@ const usuarioSchema = mongoose.Schema({
         default  : false
     }
 }, {
-    timestamps   : true, 
+    timestamps   : true, //* Esto le añade el created_At y el updated_At
 });
 
-usuarioSchema.pre('save', async function (next) {
-    if(!this.isModified('password')){
+usuarioSchema.pre('save', async function (next) { //* Este pre lo que hace es antes del 'save' lanzar esa función. Tambien existe post para hacerlo después
+    if(!this.isModified('password')){ //? No está del todo entendido
         next();
     }
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(10); //* Esto le dice cuán dificil tiene que ser el hasheo, cuanto más alto más seguro pero más consume
 
-    this.password = await bcrypt.hash(this.password, salt);
-})
+    this.password = await bcrypt.hash(this.password, salt); //! This aquí hace referencia a dentro del objeto del schema
+});
+
+usuarioSchema.methods.comprobarPassword = async function (passwordFormulario) {
+    return await bcrypt.compare(passwordFormulario,this.password);
+}
 
 const Usuario = mongoose.model('Usuario',usuarioSchema);
 
