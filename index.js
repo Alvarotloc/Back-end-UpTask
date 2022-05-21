@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import conectarDB from './config/bbdd.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import proyectosRoutes from './routes/proyectosRoutes.js';
+import tareasRoutes from './routes/tareasRoutes.js';
 
 const servidor  = express();
 
@@ -17,6 +18,7 @@ conectarDB();
 
 servidor.use('/api/usuarios',usuarioRoutes);
 servidor.use('/api/proyectos',proyectosRoutes);
+servidor.use('/api/tareas',tareasRoutes);
 
 const puerto = process.env.PORT || 4000;
 
