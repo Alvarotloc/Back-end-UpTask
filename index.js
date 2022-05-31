@@ -5,6 +5,7 @@ import conectarDB from './config/bbdd.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import proyectosRoutes from './routes/proyectosRoutes.js';
 import tareasRoutes from './routes/tareasRoutes.js';
+import cors from 'cors';
 
 const servidor  = express();
 
@@ -14,7 +15,23 @@ dotenv.config();
 
 conectarDB();
 
+//* Configurar CORS
+
+const whiteList = [process.env.FRONTEND_URL];
+
+const corsOptions = {
+    origin : function(origin,callback){
+        if(whiteList.includes(origin)){
+            callback(null,true);
+        } else {
+            callback(new Error('Error de Cors'))
+        }
+    }
+}
+
 //* Routing
+
+servidor.use(cors(corsOptions))
 
 servidor.use('/api/usuarios',usuarioRoutes);
 servidor.use('/api/proyectos',proyectosRoutes);

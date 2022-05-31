@@ -2,7 +2,6 @@ import Proyecto from "../models/Proyecto.js"
 import Tarea from "../models/Tarea.js";
 
 const obtenerProyectos = async (req,res) => {
-    console.log(req.usuario)
     const proyectos = await Proyecto.find().where('creador').equals(req.usuario);
 
     res.json(proyectos)

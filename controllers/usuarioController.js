@@ -1,3 +1,4 @@
+import { emailRegistro, emailOlvidePassword } from "../helpers/emails.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
 import Usuario from "../models/Usuario.js";
@@ -18,9 +19,18 @@ const registrarUsuario = async (req, res) => {
   try {
     const usuario = new Usuario(req.body);
     usuario.token = generarId();
+    await usuario.save();
+    //* Enviar email de confirmacion
+    const { email, nombre, token } = usuario;
+    emailRegistro({
+      email,
+      nombre,
+      token,
+    });
 
-    const usuarioAlmacenado = await usuario.save();
-    res.json(usuarioAlmacenado);
+    res.json({
+      msg: "Usuario Creado Correctamente, Revisa tu Email para Confirmar la Cuenta",
+    });
   } catch (error) {
     console.log(error);
   }
@@ -50,8 +60,8 @@ const logarUsuario = async (req, res) => {
     });
     return;
   }
-    const error = new Error("El password es incorrecto");
-    return res.status(403).json({ msg: error.message });
+  const error = new Error("El password es incorrecto");
+  return res.status(403).json({ msg: error.message });
 };
 
 const confirmarUsuario = async (req, res) => {
@@ -65,17 +75,17 @@ const confirmarUsuario = async (req, res) => {
 
   try {
     usuarioConfirmar.auth = true;
-    usuarioConfirmar.token = '';
+    usuarioConfirmar.token = "";
     await usuarioConfirmar.save();
-    res.json({msg : 'Usuario confirmado correctamente'});
+    res.json({ msg: "Usuario confirmado correctamente" });
   } catch (error) {
     console.log(error);
   }
 };
 
-const olvidePassword = async (req,res) => {
-  const {email} = req.body;
-  const usuario = await Usuario.findOne({email});
+const olvidePassword = async (req, res) => {
+  const { email } = req.body;
+  const usuario = await Usuario.findOne({ email });
   if (!usuario) {
     const error = new Error("El usuario no existe");
     return res.status(404).json({ msg: error.message });
@@ -84,44 +94,61 @@ const olvidePassword = async (req,res) => {
   try {
     usuario.token = generarId();
     await usuario.save();
-    res.json({msg : 'Hemos enviado un mensaje al email con las instrucciones'})
+    //* Enviamos el mail
+    const { email, nombre, token } = usuario;
+    emailOlvidePassword({
+      email,
+      nombre,
+      token
+    })
+    res.json({
+      msg: "Hemos enviado un mensaje al email con las instrucciones",
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 };
 
-const comprobarToken = async (req,res) => {
-  const {token} = req.params;
+const comprobarToken = async (req, res) => {
+  const { token } = req.params;
 
-  const tokenValido = await Usuario.findOne({token});
+  const tokenValido = await Usuario.findOne({ token });
 
-  if(!tokenValido){
+  if (!tokenValido) {
     const error = new Error("Token no válido");
     return res.status(404).json({ msg: error.message });
   }
 
-  res.json({msg : 'Token válido y el usuario existe'});
+  res.json({ msg: "Token válido y el usuario existe" });
 };
 
-const nuevoPassword = async (req,res) => {
-  const {token} = req.params;
-  const {password} = req.body;
+const nuevoPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
 
-  const usuario = await Usuario.findOne({token});
-  if(!usuario){
+  const usuario = await Usuario.findOne({ token });
+  if (!usuario) {
     const error = new Error("Token no válido");
     return res.status(404).json({ msg: error.message });
   }
   usuario.password = password;
-  usuario.token = '';
+  usuario.token = "";
   await usuario.save();
-  res.json({msg : 'Password cambiada con éxito'});
-}
+  res.json({ msg: "Password cambiada con éxito" });
+};
 
-const perfil = async (req,res) => {
-  const {usuario} = req;
+const perfil = async (req, res) => {
+  const { usuario } = req;
 
-  res.json(usuario)
-}
+  res.json(usuario);
+};
 
-export { registrarUsuario, logarUsuario, confirmarUsuario, olvidePassword, comprobarToken, nuevoPassword, perfil };
+export {
+  registrarUsuario,
+  logarUsuario,
+  confirmarUsuario,
+  olvidePassword,
+  comprobarToken,
+  nuevoPassword,
+  perfil,
+};
